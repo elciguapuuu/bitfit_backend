@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model goals {
+  goal_id       Int       @id @default(autoincrement())
+  user_id       Int?
+  goal_type     String?   @db.VarChar(50)
+  target_weight Decimal?  @db.Decimal(5, 2)
+  target_date   DateTime? @db.Date
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
+  users         users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "goals_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model healthconditions {
+  condition_id   Int       @id @default(autoincrement())
+  user_id        Int?
+  condition_name String?   @db.VarChar(100)
+  severity       String?   @db.VarChar(50)
+  diagnosed_at   DateTime? @db.Date
+  users          users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "healthconditions_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model recommendations {
+  rec_id      Int       @id @default(autoincrement())
+  user_id     Int?
+  rec_type    String?   @db.VarChar(50)
+  description String?   @db.Text
+  calories    Int?
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  users       users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "recommendations_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model usermetrics {
+  metric_id   Int       @id @default(autoincrement())
+  user_id     Int?
+  weight      Decimal?  @db.Decimal(5, 2)
+  height      Decimal?  @db.Decimal(5, 2)
+  bmi         Decimal?  @db.Decimal(5, 2)
+  recorded_at DateTime? @default(now()) @db.Timestamp(0)
+  users       users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "usermetrics_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  user_id          Int                @id @default(autoincrement())
+  name             String?            @db.VarChar(100)
+  password_hash    String             @db.VarChar(255)
+  email            String?            @unique(map: "email") @db.VarChar(100)
+  date_of_birth    DateTime?          @db.Date
+  gender           String?            @db.VarChar(10)
+  last_login       DateTime?          @default(now()) @db.Timestamp(0)
+  created_at       DateTime?          @default(now()) @db.Timestamp(0)
+  goals            goals[]
+  healthconditions healthconditions[]
+  recommendations  recommendations[]
+  usermetrics      usermetrics[]
+}
